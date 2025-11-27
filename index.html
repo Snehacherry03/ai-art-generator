@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced AI Art Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 3em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .control-panel {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 10px;
+            padding: 5px;
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .tab-button.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8faff;
+        }
+        
+        .upload-area:hover {
+            background: #f0f4ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-icon {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .style-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .style-option {
+            padding: 15px 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .style-option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .style-option.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .style-icon {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result-panel {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            text-align: center;
+        }
+        
+        .image-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .image-container {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .image-container h4 {
+            margin-bottom: 10px;
+            color: #495057;
+        }
+        
+        .result-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+        
+        .art-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e7f3ff;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            transition: transform 0.3s;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature h3 {
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: #28a745;
+            color: white;
+            border-radius: 8px;
+            z-index: 1000;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .notification.error {
+            background: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 Advanced AI Art Generator</h1>
+            <p class="subtitle">Transform your photos with AI-powered artistic styles and generate art from text descriptions</p>
+        </header>
+        
+        <div class="app-container">
+            <div class="control-panel">
+                <div class="tab-buttons">
+                    <button class="tab-button active" onclick="switchTab('style-transfer')">Style Transfer</button>
+                    <button class="tab-button" onclick="switchTab('text-to-art')">Text to Art</button>
+                </div>
+                
+                <!-- Style Transfer Tab -->
+                <div id="style-transfer" class="tab-content active">
+                    <h2>Upload & Transform</h2>
+                    
+                    <div class="input-group">
+                        <label>Upload Your Image:</label>
+                        <div class="upload-area" id="uploadArea" onclick="document.getElementById('imageUpload').click()">
+                            <div class="upload-icon">📁</div>
+                            <h3>Click to Upload Image</h3>
+                            <p>Supports JPG, PNG, GIF (Max 16MB)</p>
+                            <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                            <img id="imagePreview" class="image-preview" alt="Image Preview">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Choose Art Style:</label>
+                        <div class="style-grid">
+                            <div class="style-option" data-style="oil_painting">
+                                <span class="style-icon">🎨</span>
+                                Oil Painting
+                            </div>
+                            <div class="style-option" data-style="watercolor">
+                                <span class="style-icon">💧</span>
+                                Watercolor
+                            </div>
+                            <div class="style-option" data-style="sketch">
+                                <span class="style-icon">✏️</span>
+                                Pencil Sketch
+                            </div>
+                            <div class="style-option" data-style="pop_art">
+                                <span class="style-icon">🌟</span>
+                                Pop Art
+                            </div>
+                            <div class="style-option" data-style="vintage">
+                                <span class="style-icon">📻</span>
+                                Vintage
+                            </div>
+                            <div class="style-option" data-style="glitch">
+                                <span class="style-icon">💫</span>
+                                Glitch Art
+                            </div>
+                            <div class="style-option" data-style="pixel_art">
+                                <span class="style-icon">👾</span>
+                                Pixel Art
+                            </div>
+                            <div class="style-option" data-style="cartoon">
+                                <span class="style-icon">🖼️</span>
+                                Cartoon
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="applyStyle()" id="applyStyleBtn">
+                        Apply Artistic Style 🎨
+                    </button>
+                </div>
+                
+                <!-- Text to Art Tab -->
+                <div id="text-to-art" class="tab-content">
+                    <h2>Generate from Text</h2>
+                    
+                    <div class="input-group">
+                        <label for="artPrompt">Art Description:</label>
+                        <textarea id="artPrompt" placeholder="Describe the artwork you want to create... (e.g., 'A beautiful sunset over mountains with a lake, vibrant colors')"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="artStyle">Art Style:</label>
+                        <select id="artStyle">
+                            <option value="abstract">Abstract</option>
+                            <option value="landscape">Landscape</option>
+                            <option value="geometric">Geometric</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Image Size:</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <input type="number" id="artWidth" placeholder="Width" value="512" min="100" max="1024">
+                            <input type="number" id="artHeight" placeholder="Height" value="512" min="100" max="1024">
+                        </div>
+                    </div>
+                    
+                    <button onclick="generateFromText()" id="generateArtBtn">
+                        Generate Artwork ✨
+                    </button>
+                    
+                    <div class="example-prompts" style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px;">
+                        <h4>💡 Example Prompts:</h4>
+                        <ul style="list-style: none;">
+                            <li style="padding: 5px 0; cursor: pointer; color: #495057;" onclick="setPrompt('A serene mountain landscape at sunset with a calm lake reflecting the colors')">Mountain sunset with lake reflection</li>
+                            <li style="padding: 5px 0; cursor: pointer; color: #495057;" onclick="setPrompt('Abstract geometric patterns in vibrant neon colors with dark background')">Abstract neon geometric patterns</li>
+                            <li style="padding: 5px 0; cursor: pointer; color: #495057;" onclick="setPrompt('A fantasy forest with glowing mushrooms and magical creatures')">Fantasy forest with glowing elements</li>
+                            <li style="padding: 5px 0; cursor: pointer; color: #495057;" onclick="setPrompt('Ocean waves crashing against rocky cliffs during a storm')">Stormy ocean waves</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result-panel">
+                <h2>Your Artwork</h2>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p id="loadingText">Processing your image...</p>
+                </div>
+                
+                <div id="styleTransferResult" style="display: none;">
+                    <div class="image-comparison">
+                        <div class="image-container">
+                            <h4>Original Image</h4>
+                            <img id="originalImage" class="result-image" alt="Original Image">
+                        </div>
+                        <div class="image-container">
+                            <h4>Styled Result</h4>
+                            <img id="styledImage" class="result-image" alt="Styled Image">
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="textArtResult" style="display: none;">
+                    <div class="image-container">
+                        <h4>Generated Artwork</h4>
+                        <img id="generatedImage" class="result-image" alt="Generated Artwork">
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn-success" onclick="downloadArt()" id="downloadBtn" style="display: none;">
+                        Download Artwork 📥
+                    </button>
+                    <button class="btn-secondary" onclick="shareArt()" id="shareBtn" style="display: none;">
+                        Share Artwork 🔗
+                    </button>
+                </div>
+                
+                <div id="artInfo" class="art-info" style="display: none;">
+                    <strong>Art Details:</strong>
+                    <div id="artDetails"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>🎨 Real Style Transfer</h3>
+                <p>Apply 8 different artistic styles to your actual photos</p>
+            </div>
+            <div class="feature">
+                <h3>✨ Text to Art</h3>
+                <p>Generate unique artwork from text descriptions</p>
+            </div>
+            <div class="feature">
+                <h3>🚀 No Dependencies</h3>
+                <p>Runs entirely in Python with Pillow - no external APIs</p>
+            </div>
+            <div class="feature">
+                <h3>💾 Instant Results</h3>
+                <p>Process images in seconds with real-time preview</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentArtwork = null;
+        let currentTab = 'style-transfer';
+        
+        // Initialize event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Image upload preview
+            document.getElementById('imageUpload').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.getElementById('imagePreview');
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        document.querySelector('#uploadArea h3').textContent = 'Image Ready!';
+                        document.querySelector('#uploadArea p').textContent = 'Click to change image';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Style option selection
+            document.querySelectorAll('.style-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.style-option').forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Select first style by default
+            document.querySelector('.style-option').classList.add('active');
+        });
+        
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Activate selected tab
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            currentTab = tabName;
+            
+            // Reset results when switching tabs
+            resetResults();
+        }
+        
+        function setPrompt(prompt) {
+            document.getElementById('artPrompt').value = prompt;
+        }
+        
+        async function applyStyle() {
+            const fileInput = document.getElementById('imageUpload');
+            const styleOption = document.querySelector('.style-option.active');
+            
+            if (!fileInput.files[0]) {
+                showNotification('Please upload an image first!', 'error');
+                return;
+            }
+            
+            if (!styleOption) {
+                showNotification('Please select a style!', 'error');
+                return;
+            }
+            
+            const styleName = styleOption.getAttribute('data-style');
+            const file = fileInput.files[0];
+            const loading = document.getElementById('loading');
+            const loadingText = document.getElementById('loadingText');
+            const resultSection = document.getElementById('styleTransferResult');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const shareBtn = document.getElementById('shareBtn');
+            const artInfo = document.getElementById('artInfo');
+            
+            // Show loading state
+            loading.style.display = 'block';
+            loadingText.textContent = `Applying ${styleName.replace('_', ' ')} style...`;
+            resultSection.style.display = 'none';
+            downloadBtn.style.display = 'none';
+            shareBtn.style.display = 'none';
+            artInfo.style.display = 'none';
+            
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('style_name', styleName);
+                
+                const response = await fetch('/api/apply-style', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentArtwork = data;
+                    
+                    // Show original image
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('originalImage').src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                    
+                    // Show styled image
+                    document.getElementById('styledImage').src = data.image;
+                    
+                    // Show results
+                    resultSection.style.display = 'block';
+                    downloadBtn.style.display = 'block';
+                    shareBtn.style.display = 'block';
+                    
+                    // Show art info
+                    document.getElementById('artDetails').innerHTML = `
+                        <div>Style: ${data.style_applied}</div>
+                        <div>Original Size: ${data.original_size}</div>
+                        <div>Message: ${data.message}</div>
+                    `;
+                    artInfo.style.display = 'block';
+                    
+                    showNotification(data.message, 'success');
+                } else {
+                    throw new Error(data.error || 'Style application failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Failed to apply style. Make sure the server is running.', 'error');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        async function generateFromText() {
+            const prompt = document.getElementById('artPrompt').value.trim();
+            const style = document.getElementById('artStyle').value;
+            const width = document.getElementById('artWidth').value;
+            const height = document.getElementById('artHeight').value;
+            
+            if (!prompt) {
+                showNotification('Please enter an art description!', 'error');
+                return;
+            }
+            
+            const loading = document.getElementById('loading');
+            const loadingText = document.getElementById('loadingText');
+            const resultSection = document.getElementById('textArtResult');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const shareBtn = document.getElementById('shareBtn');
+            const artInfo = document.getElementById('artInfo');
+            
+            // Show loading state
+            loading.style.display = 'block';
+            loadingText.textContent = `Generating ${style} artwork...`;
+            resultSection.style.display = 'none';
+            downloadBtn.style.display = 'none';
+            shareBtn.style.display = 'none';
+            artInfo.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/generate-from-text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        style: style,
+                        width: parseInt(width),
+                        height: parseInt(height)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentArtwork = data;
+                    
+                    // Show generated image
+                    document.getElementById('generatedImage').src = data.image;
+                    
+                    // Show results
+                    resultSection.style.display = 'block';
+                    downloadBtn.style.display = 'block';
+                    shareBtn.style.display = 'block';
+                    
+                    // Show art info
+                    document.getElementById('artDetails').innerHTML = `
+                        <div>Prompt: ${data.prompt}</div>
+                        <div>Style: ${data.style}</div>
+                        <div>Size: ${width}x${height}</div>
+                        <div>Message: ${data.message}</div>
+                    `;
+                    artInfo.style.display = 'block';
+                    
+                    showNotification(data.message, 'success');
+                } else {
+                    throw new Error(data.error || 'Art generation failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Failed to generate artwork. Make sure the server is running.', 'error');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        function downloadArt() {
+            if (!currentArtwork) return;
+            
+            const link = document.createElement('a');
+            link.href = currentArtwork.image;
+            link.download = currentArtwork.filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Artwork downloaded successfully!', 'success');
+        }
+        
+        function shareArt() {
+            if (!currentArtwork) return;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My AI Generated Art',
+                    text: 'Check out this artwork I created with AI!',
+                    url: window.location.href
+                });
+            } else {
+                // Copy image to clipboard as fallback
+                const img = document.createElement('img');
+                img.src = currentArtwork.image;
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    canvas.toBlob(function(blob) {
+                        navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ]);
+                        showNotification('Artwork copied to clipboard!', 'success');
+                    });
+                };
+            }
+        }
+        
+        function resetResults() {
+            document.getElementById('styleTransferResult').style.display = 'none';
+            document.getElementById('textArtResult').style.display = 'none';
+            document.getElementById('downloadBtn').style.display = 'none';
+            document.getElementById('shareBtn').style.display = 'none';
+            document.getElementById('artInfo').style.display = 'none';
+            currentArtwork = null;
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type === 'error' ? 'error' : ''}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transition = 'opacity 0.5s';
+                notification.style.opacity = '0';
+                setTimeout(() => document.body.removeChild(notification), 500);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
